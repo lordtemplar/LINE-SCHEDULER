@@ -94,11 +94,7 @@ with tabs[0]:
                     st.success("Message scheduled successfully.")
                 except Exception as e:
                     st.error(f"Error: {e}")
-                # คงค่าเดิม
-                st.session_state.msg_text = message
-                st.session_state.msg_date = date
-                st.session_state.msg_time = time
-                st.session_state.msg_target = target_choice
+                # ไม่ต้อง set session_state.xxx ที่นี่
                 st.experimental_rerun()
             else:
                 st.error("Please fill in all fields.")
