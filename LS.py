@@ -178,7 +178,7 @@ with tabs[3]:
     if not targets.empty:
         for idx, row in targets.iterrows():
             with st.expander(f"{row['Name']} | {row['TargetID']}"):
-                with st.form(f"edit_target_{idx}", clear_on_submit=True):
+                with st.form(f"edit_target_{idx}", clear_on_submit=False):
                     t_type_e = st.selectbox("Type", options=["Person", "Group"], index=0 if row["Type"] == "Person" else 1, key=f"edittype_{idx}")
                     name_e = st.text_input("Name", value=row["Name"], key=f"editname_{idx}")
                     target_id_e = st.text_input("TargetID", value=row["TargetID"], key=f"editid_{idx}")
