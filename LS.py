@@ -3,6 +3,7 @@ import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 import pandas as pd
 from datetime import datetime
+from zoneinfo import ZoneInfo  # สำหรับ Python 3.9+
 
 st.set_page_config(layout="wide", page_title="LINE Scheduler", initial_sidebar_state="collapsed")
 
@@ -48,6 +49,9 @@ tabs = st.tabs([
     "Edit/Delete Recipient"
 ])
 
+# เวลาปัจจุบันประเทศไทย
+now_thai = datetime.now(ZoneInfo("Asia/Bangkok"))
+
 # TAB 1: NEW SCHEDULE
 with tabs[0]:
     st.header("New Scheduled Message")
@@ -57,9 +61,9 @@ with tabs[0]:
     if 'msg_text' not in st.session_state:
         st.session_state.msg_text = ''
     if 'msg_date' not in st.session_state:
-        st.session_state.msg_date = datetime.now().date()
+        st.session_state.msg_date = now_thai.date()
     if 'msg_time' not in st.session_state:
-        st.session_state.msg_time = (datetime.now() + pd.Timedelta(minutes=1)).time().replace(second=0, microsecond=0)
+        st.session_state.msg_time = now_thai.time().replace(second=0, microsecond=0)
     if not targets.empty and 'msg_target' not in st.session_state:
         target_options = [f"{row['Name']} | {row['TargetID']}" for idx, row in targets.iterrows()]
         st.session_state.msg_target = target_options[0]
@@ -103,7 +107,7 @@ with tabs[0]:
 # --- Tab 2: Edit/Delete Message ---
 with tabs[1]:
     st.header("Edit / Delete Scheduled Message")
-    # เพิ่มปุ่มไปยัง Google Sheets
+    # ปุ่มไปยัง Google Sheets
     st.markdown(
         """
         <a href="https://docs.google.com/spreadsheets/d/1L4zdfGcNw1a0ckYEDOMcYBTTkf1XgfSsvh8hFZNcH7Q/edit?usp=sharing" target="_blank">
@@ -114,9 +118,8 @@ with tabs[1]:
         """,
         unsafe_allow_html=True
     )
-    # เพิ่มช่องว่าง
-    st.markdown("<br>", unsafe_allow_html=True)  # สามารถใช้หลายบรรทัดได้ "<br><br>"
-    
+    st.markdown("<br>", unsafe_allow_html=True)  # ช่องว่าง
+
     if not scheduler.empty:
         for idx, row in scheduler.iterrows():
             with st.expander(f"{row['Datetime']} | {row['Message'][:30]}..."):
