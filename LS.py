@@ -45,7 +45,7 @@ sheet_targets = client.open(SPREADSHEET_NAME).worksheet(TARGET_SHEET)
 scheduler = pd.DataFrame(sheet_scheduler.get_all_records())
 targets = pd.DataFrame(sheet_targets.get_all_records())
 
-st.title("LINE Message Scheduler (เวลาไทย)")
+st.title("LINE Message Scheduler")
 
 tabs = st.tabs([
     "New Message",
