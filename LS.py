@@ -31,16 +31,10 @@ SPREADSHEET_NAME = "LINE Scheduler"
 SCHEDULER_SHEET = "Scheduler Table"
 TARGET_SHEET = "User/Group Table"
 
-# โหลดข้อมูลสดใหม่ทุกครั้ง
 def load_scheduler():
-    return pd.DataFrame(sheet_scheduler.get_all_records())
+    return pd.DataFrame(client.open(SPREADSHEET_NAME).worksheet(SCHEDULER_SHEET).get_all_records())
 def load_targets():
-    return pd.DataFrame(sheet_targets.get_all_records())
-
-SPREADSHEET_NAME = "LINE Scheduler"
-SCHEDULER_SHEET = "Scheduler Table"
-TARGET_SHEET = "User/Group Table"
-
+    return pd.DataFrame(client.open(SPREADSHEET_NAME).worksheet(TARGET_SHEET).get_all_records())
 sheet_scheduler = client.open(SPREADSHEET_NAME).worksheet(SCHEDULER_SHEET)
 sheet_targets = client.open(SPREADSHEET_NAME).worksheet(TARGET_SHEET)
 
@@ -53,6 +47,12 @@ tabs = st.tabs([
 ])
 
 now_thai = datetime.now(ZoneInfo("Asia/Bangkok"))
+
+# ----- Action message and refresh button -----
+if st.session_state.get("action_message"):
+    st.success(st.session_state["action_message"])
+    st.button("🔄 Refresh Page", on_click=lambda: st.experimental_set_query_params(refresh=str(datetime.now())))
+    st.session_state["action_message"] = ""
 
 # TAB 1: NEW SCHEDULE
 with tabs[0]:
@@ -87,12 +87,11 @@ with tabs[0]:
                 ]
                 try:
                     sheet_scheduler.append_row(new_row)
-                    st.success("Message scheduled successfully.")
-                    st.button("🔄 Refresh Page", on_click=lambda: st.experimental_set_query_params(refresh=str(datetime.now())))
+                    st.session_state["action_message"] = "Message scheduled successfully."
                 except Exception as e:
-                    st.error(f"Error: {e}")
+                    st.session_state["action_message"] = f"Error: {e}"
             else:
-                st.error("Please fill in all fields.")
+                st.session_state["action_message"] = "Please fill in all fields."
 
 # --- Tab 2: Edit/Delete Message ---
 with tabs[1]:
@@ -138,17 +137,15 @@ with tabs[1]:
                             sheet_scheduler.update_cell(idx + 2, 1, dt_e.strftime("%Y-%m-%d %H:%M"))
                             sheet_scheduler.update_cell(idx + 2, 2, new_msg)
                             sheet_scheduler.update_cell(idx + 2, 3, new_target_id)
-                            st.success("Message updated successfully.")
-                            st.button("🔄 Refresh Page", on_click=lambda: st.experimental_set_query_params(refresh=str(datetime.now())))
+                            st.session_state["action_message"] = "Message updated successfully."
                         except Exception as e:
-                            st.error(f"Update error: {e}")
+                            st.session_state["action_message"] = f"Update error: {e}"
                     if delete:
                         try:
                             sheet_scheduler.delete_rows(idx + 2)
-                            st.success("Message deleted successfully.")
-                            st.button("🔄 Refresh Page", on_click=lambda: st.experimental_set_query_params(refresh=str(datetime.now())))
+                            st.session_state["action_message"] = "Message deleted successfully."
                         except Exception as e:
-                            st.error(f"Delete error: {e}")
+                            st.session_state["action_message"] = f"Delete error: {e}"
     else:
         st.info("No scheduled messages found.")
 
@@ -166,12 +163,11 @@ with tabs[2]:
             if target_id and (name or t_type == "Group"):
                 try:
                     sheet_targets.append_row([target_id, t_type, name])
-                    st.success("Recipient added successfully.")
-                    st.button("🔄 Refresh Page", on_click=lambda: st.experimental_set_query_params(refresh=str(datetime.now())))
+                    st.session_state["action_message"] = "Recipient added successfully."
                 except Exception as e:
-                    st.error(f"Add error: {e}")
+                    st.session_state["action_message"] = f"Add error: {e}"
             else:
-                st.warning("Please fill in all fields.")
+                st.session_state["action_message"] = "Please fill in all fields."
 
 # --- Tab 4: Edit/Delete Recipient ---
 with tabs[3]:
@@ -192,16 +188,14 @@ with tabs[3]:
                             sheet_targets.update_cell(idx + 2, 1, target_id_e)
                             sheet_targets.update_cell(idx + 2, 2, t_type_e)
                             sheet_targets.update_cell(idx + 2, 3, name_e)
-                            st.success("Recipient updated successfully.")
-                            st.button("🔄 Refresh Page", on_click=lambda: st.experimental_set_query_params(refresh=str(datetime.now())))
+                            st.session_state["action_message"] = "Recipient updated successfully."
                         except Exception as e:
-                            st.error(f"Update error: {e}")
+                            st.session_state["action_message"] = f"Update error: {e}"
                     if delete:
                         try:
                             sheet_targets.delete_rows(idx + 2)
-                            st.success("Recipient deleted successfully.")
-                            st.button("🔄 Refresh Page", on_click=lambda: st.experimental_set_query_params(refresh=str(datetime.now())))
+                            st.session_state["action_message"] = "Recipient deleted successfully."
                         except Exception as e:
-                            st.error(f"Delete error: {e}")
+                            st.session_state["action_message"] = f"Delete error: {e}"
     else:
         st.info("No recipients found.")
