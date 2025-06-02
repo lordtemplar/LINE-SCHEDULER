@@ -97,7 +97,7 @@ with tabs[0]:
                 st.session_state.msg_date = date
                 st.session_state.msg_time = time
                 st.session_state.msg_target = target_choice
-                st.experimental_rerun()
+                st.rerun()
             else:
                 st.error("Please fill in all fields.")
 
@@ -145,11 +145,11 @@ with tabs[1]:
                         sheet_scheduler.update_cell(idx + 2, 2, new_msg)
                         sheet_scheduler.update_cell(idx + 2, 3, new_target_id)
                         st.success("Message updated successfully.")
-                        st.experimental_rerun()
+                        st.rerun()
                     if delete:
                         sheet_scheduler.delete_rows(idx + 2)
                         st.success("Message deleted successfully.")
-                        st.experimental_rerun()
+                        st.rerun()
     else:
         st.info("No scheduled messages found.")
 
@@ -166,7 +166,7 @@ with tabs[2]:
             if target_id and (name or t_type == "Group"):
                 sheet_targets.append_row([target_id, t_type, name])
                 st.success("Recipient added successfully.")
-                st.experimental_rerun()
+                st.rerun()
             else:
                 st.warning("Please fill in all fields.")
 
@@ -187,10 +187,10 @@ with tabs[3]:
                         sheet_targets.update_cell(idx + 2, 2, t_type_e)
                         sheet_targets.update_cell(idx + 2, 3, name_e)
                         st.success("Recipient updated successfully.")
-                        st.experimental_rerun()
+                        st.rerun()
                     if delete:
                         sheet_targets.delete_rows(idx + 2)
                         st.success("Recipient deleted successfully.")
-                        st.experimental_rerun()
+                        st.rerun()
     else:
         st.info("No recipients found.")
