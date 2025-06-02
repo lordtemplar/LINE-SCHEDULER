@@ -33,9 +33,14 @@ TARGET_SHEET = "User/Group Table"
 
 # โหลดข้อมูลสดใหม่ทุกครั้ง
 def load_scheduler():
-    return pd.DataFrame(client.open(SPREADSHEET_NAME).worksheet(SCHEDULER_SHEET).get_all_records())
+    return pd.DataFrame(sheet_scheduler.get_all_records())
 def load_targets():
-    return pd.DataFrame(client.open(SPREADSHEET_NAME).worksheet(TARGET_SHEET).get_all_records())
+    return pd.DataFrame(sheet_targets.get_all_records())
+
+SPREADSHEET_NAME = "LINE Scheduler"
+SCHEDULER_SHEET = "Scheduler Table"
+TARGET_SHEET = "User/Group Table"
+
 sheet_scheduler = client.open(SPREADSHEET_NAME).worksheet(SCHEDULER_SHEET)
 sheet_targets = client.open(SPREADSHEET_NAME).worksheet(TARGET_SHEET)
 
@@ -55,25 +60,16 @@ with tabs[0]:
     targets = load_targets()
     st.header("New Scheduled Message")
     st.dataframe(scheduler, use_container_width=True, hide_index=True)
-    if 'msg_text' not in st.session_state:
-        st.session_state.msg_text = ''
-    if 'msg_date' not in st.session_state:
-        st.session_state.msg_date = now_thai.date()
-    if 'msg_time' not in st.session_state:
-        st.session_state.msg_time = now_thai.time().replace(second=0, microsecond=0)
-    if not targets.empty and 'msg_target' not in st.session_state:
-        target_options = [f"{row['Name']} | {row['TargetID']}" for _, row in targets.iterrows()]
-        st.session_state.msg_target = target_options[0]
     with st.form("add_schedule"):
-        message = st.text_area("Message", max_chars=500, value=st.session_state.msg_text)
-        date = st.date_input("Date", value=st.session_state.msg_date)
-        time = st.time_input("Time", value=st.session_state.msg_time)
+        message = st.text_area("Message", max_chars=500)
+        date = st.date_input("Date", value=now_thai.date())
+        time = st.time_input("Time", value=now_thai.time().replace(second=0, microsecond=0))
         if not targets.empty:
             target_options = [f"{row['Name']} | {row['TargetID']}" for _, row in targets.iterrows()]
             target_choice = st.selectbox(
                 "Recipient (User/Group)",
                 options=target_options,
-                index=target_options.index(st.session_state.msg_target)
+                index=0
             )
             target_id = target_choice.split('|')[-1].strip()
         else:
@@ -92,10 +88,9 @@ with tabs[0]:
                 try:
                     sheet_scheduler.append_row(new_row)
                     st.success("Message scheduled successfully.")
+                    st.button("🔄 Refresh Page", on_click=lambda: st.experimental_set_query_params(refresh=str(datetime.now())))
                 except Exception as e:
                     st.error(f"Error: {e}")
-                # ไม่ต้อง set session_state.xxx ที่นี่
-                st.experimental_rerun()
             else:
                 st.error("Please fill in all fields.")
 
@@ -144,16 +139,16 @@ with tabs[1]:
                             sheet_scheduler.update_cell(idx + 2, 2, new_msg)
                             sheet_scheduler.update_cell(idx + 2, 3, new_target_id)
                             st.success("Message updated successfully.")
+                            st.button("🔄 Refresh Page", on_click=lambda: st.experimental_set_query_params(refresh=str(datetime.now())))
                         except Exception as e:
                             st.error(f"Update error: {e}")
-                        st.experimental_rerun()
                     if delete:
                         try:
                             sheet_scheduler.delete_rows(idx + 2)
                             st.success("Message deleted successfully.")
+                            st.button("🔄 Refresh Page", on_click=lambda: st.experimental_set_query_params(refresh=str(datetime.now())))
                         except Exception as e:
                             st.error(f"Delete error: {e}")
-                        st.experimental_rerun()
     else:
         st.info("No scheduled messages found.")
 
@@ -172,9 +167,9 @@ with tabs[2]:
                 try:
                     sheet_targets.append_row([target_id, t_type, name])
                     st.success("Recipient added successfully.")
+                    st.button("🔄 Refresh Page", on_click=lambda: st.experimental_set_query_params(refresh=str(datetime.now())))
                 except Exception as e:
                     st.error(f"Add error: {e}")
-                st.experimental_rerun()
             else:
                 st.warning("Please fill in all fields.")
 
@@ -198,15 +193,15 @@ with tabs[3]:
                             sheet_targets.update_cell(idx + 2, 2, t_type_e)
                             sheet_targets.update_cell(idx + 2, 3, name_e)
                             st.success("Recipient updated successfully.")
+                            st.button("🔄 Refresh Page", on_click=lambda: st.experimental_set_query_params(refresh=str(datetime.now())))
                         except Exception as e:
                             st.error(f"Update error: {e}")
-                        st.experimental_rerun()
                     if delete:
                         try:
                             sheet_targets.delete_rows(idx + 2)
                             st.success("Recipient deleted successfully.")
+                            st.button("🔄 Refresh Page", on_click=lambda: st.experimental_set_query_params(refresh=str(datetime.now())))
                         except Exception as e:
                             st.error(f"Delete error: {e}")
-                        st.experimental_rerun()
     else:
         st.info("No recipients found.")
