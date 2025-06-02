@@ -189,10 +189,11 @@ with tabs[3]:
                         sheet_targets.update_cell(idx + 2, 2, t_type_e)
                         sheet_targets.update_cell(idx + 2, 3, name_e)
                         st.success("Recipient updated successfully.")
-                        st.experimental_rerun()
+                        st.stop()  # เปลี่ยนจาก experimental_rerun เป็น stop หรือ return
                     if delete:
                         sheet_targets.delete_rows(idx + 2)
                         st.success("Recipient deleted successfully.")
-                        st.experimental_rerun()
+                        st.stop()  # เปลี่ยนจาก experimental_rerun เป็น stop หรือ return
+
     else:
         st.info("No recipients found.")
